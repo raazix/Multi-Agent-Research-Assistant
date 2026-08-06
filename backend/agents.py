@@ -1,36 +1,31 @@
-# pyrefly: ignore [missing-import]
-from langchain.agents import create_agent
-#from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from tools import web_search, scrape_url
 import os
 from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_groq import ChatGroq
+
+try:
+    from tools import scrape_url, web_search
+except ImportError:
+    from backend.tools import scrape_url, web_search
 
 load_dotenv()
-import os
 
 model_name = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
+groq_key = os.getenv("GROQ_API_KEY")
 
 llm = ChatGroq(
     model=model_name,
-    api_key=os.getenv("GROQ_API_KEY"),
+    api_key=groq_key,
     temperature=0,
     max_retries=2,
-)
-
-# model_name = os.getenv("MODEL_NAME", "gemini-3.6-flash")
-
-# llm = ChatGoogleGenerativeAI(
-#     model=model_name,
-#     google_api_key=os.getenv("GOOGLE_API_KEY"),
-#     temperature=0,
-#     max_retries=2,
-# )
+) if groq_key else None
 
 
 def build_search_agent():
+    if not llm:
+        raise ValueError("GROQ_API_KEY is not configured in .env")
     return create_agent(
         model=llm,
         tools=[web_search]
@@ -38,10 +33,12 @@ def build_search_agent():
 
 
 def build_reader_agent():
+    if not llm:
+        raise ValueError("GROQ_API_KEY is not configured in .env")
     return create_agent(
         model=llm,
         tools=[scrape_url]
-    )   
+    )
 
 
 writer_prompt = ChatPromptTemplate.from_messages([
@@ -75,7 +72,7 @@ Create a comprehensive research report on the following topic.
 2. Present at least 3-5 key findings with detailed explanations.
 3. Include statistics, examples, or recent developments whenever available.
 4. Summarize the overall findings in a conclusion.
-5. Provide a list of all source URLs used in the research.
+5. Provide a list of all 3 to 5 source URLs scraped during the research under the ## Sources section. Do not claim the report is based on a single source URL.
 
 # Output Format
 
@@ -107,10 +104,8 @@ The report should be detailed, professional, factual, and easy to read.
     )
 ])
 
-writer_chain = writer_prompt | llm | StrOutputParser()
+writer_chain = (writer_prompt | llm | StrOutputParser()) if llm else None
 
-
-#critic_chain
 
 critic_prompt = ChatPromptTemplate.from_messages([
     (
@@ -160,4 +155,4 @@ A concise summary of the overall quality of the report.
     )
 ])
 
-critic_chain = critic_prompt | llm | StrOutputParser()
+critic_chain = (critic_prompt | llm | StrOutputParser()) if llm else None

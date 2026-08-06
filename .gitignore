@@ -1,5 +1,28 @@
-.venv/
+# Environments & Secrets
 .env
-.vscode/
+.env.local
+*.env
+
+# Python
+.venv/
+venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+backend/storage.json
+
+# Node & Next.js
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+.next/
+
+# IDE & System
+.vscode/
+.idea/
+.DS_Store
+*.log
