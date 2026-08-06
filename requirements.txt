@@ -1,18 +1,26 @@
-# Core LLM and Agent Framework
+# ==========================================
+# Anveshan AI — Python Dependencies
+# ==========================================
+
+# Core LLM and Multi-Agent Orchestration
 langchain>=0.3.0
 langchain-core>=0.3.0
 langchain-groq>=0.2.0
 langchain-google-genai>=2.0.0
 langgraph>=0.2.0
 
-# Search Tool
+# Search Engine & Web Scraping Tools
 tavily-python>=0.5.0
-
-# Web Scraping
 beautifulsoup4>=4.12.0
 requests>=2.32.0
 
-# Environment and Utilities
+# FastAPI Backend & Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+sse-starlette>=2.0.0
+pydantic>=2.6.0
+
+# Utilities & Console Formatting
 python-dotenv>=1.0.0
 tenacity>=9.0.0
 rich>=13.9.0
